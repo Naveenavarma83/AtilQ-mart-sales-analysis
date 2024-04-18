@@ -1,0 +1,64 @@
+use  retail_events_db;
+1.
+
+select
+product_code, base_price
+from fact_events
+where base_price > 500 and promo_type = 'BOGOF' 
+order by base_price DESC ;
+
+2.
+
+SELECT city, COUNT(store_id) AS number_of_stores
+FROM dim_stores
+GROUP BY city
+ORDER BY number_of_stores desc ;
+
+3.            
+		
+SELECT campaign_id,
+round(sum(base_price * `quantity_sold(before_promo)`/1000000),2) as REV_before_promo_millions,
+round(sum(case when promo_type = '25% OFF' then((base_price * 0.25) * `quantity_sold(after_promo)`/1000000)
+      when promo_type = '50% OFF' then((base_price *0.5) * `quantity_sold(after_promo)`/1000000)
+      when promo_type = '33% OFF' then((base_price *0.33) * `quantity_sold(after_promo)`/1000000) 
+      when promo_type = 'BOGOF' then((base_price * (`quantity_sold(after_promo)`/ 2 ))/1000000)
+      when promo_type = '500 Cashback' then((base_price - 500 ) * `quantity_sold(after_promo)`/1000000) end),2) as REV_after_promo_millions
+from fact_events
+       GROUP BY campaign_id
+       ORDER BY campaign_id;
+       
+ 4.      
+       
+       SELECT category,
+       (sum(`quantity_sold(after_promo)`)/ sum(`quantity_sold(before_promo)`)*100) AS ISU_perc,
+       RANK () OVER (order by sum((`quantity_sold(after_promo)`/`quantity_sold(before_promo)`)*100) DESC) as p_rank
+       FROM fact_events f join dim_products p
+       on f.product_code = p.product_code
+       GROUP BY category
+       order by p_rank desc;
+      
+ 5.
+
+SELECT product_name,
+       category,
+       CASE
+           WHEN promo_type = '500 Cashback' THEN ROUND(base_price-500,2)
+           WHEN promo_type = '25% OFF' THEN ROUND(base_price-(base_price*25/100),2)
+           WHEN promo_type = '33% OFF' THEN ROUND(base_price-(base_price*33/100),2)
+           WHEN promo_type = '50% OFF' THEN ROUND(base_price-(base_price*50/100),2)
+           ELSE ROUND(base_price/2,2)
+       END as promo_price,
+       ROUND(((SUM(
+           CASE
+               WHEN promo_type = '500 Cashback' THEN ROUND(base_price-500,2)
+               WHEN promo_type = '25% OFF' THEN ROUND(base_price-(base_price*25/100),2)
+               WHEN promo_type = '33% OFF' THEN ROUND(base_price-(base_price*33/100),2)
+               WHEN promo_type = '50% OFF' THEN ROUND(base_price-(base_price*50/100),2)
+               ELSE ROUND(base_price/2,2)
+           END * `quantity_sold(after_promo)`
+       )/SUM(base_price * `quantity_sold(before_promo)`))-1)*100,2) as `IR%`
+FROM fact_events f 
+JOIN dim_products p ON f.product_code = p.product_code
+GROUP BY product_name, category, promo_price
+ORDER BY `IR%` DESC
+LIMIT 5;
