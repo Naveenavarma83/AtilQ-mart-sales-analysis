@@ -1,21 +1,19 @@
 use  retail_events_db;
-1.
 
+1. LIST OF PRODUCTS WITH BASE PRICE GREATER THAN 500 & WITH PROMOTYPE BOGOF.
 select
 product_code, base_price
 from fact_events
 where base_price > 500 and promo_type = 'BOGOF' 
 order by base_price DESC ;
 
-2.
-
+2. TO OBTAIN NUMBER OF STORES IN EACH CITY AND SORT IN DESENDING ORDER 
 SELECT city, COUNT(store_id) AS number_of_stores
 FROM dim_stores
 GROUP BY city
 ORDER BY number_of_stores desc ;
 
-3.            
-		
+3. TO OBTAIN A REPORT TO DISPLAY EACH CAMPAIGN ALONG WITH THEIR TOTAL REVENUE BEFORE & AFTER PROMOTION           
 SELECT campaign_id,
 round(sum(base_price * `quantity_sold(before_promo)`/1000000),2) as REV_before_promo_millions,
 round(sum(case when promo_type = '25% OFF' then((base_price * 0.25) * `quantity_sold(after_promo)`/1000000)
@@ -27,8 +25,7 @@ from fact_events
        GROUP BY campaign_id
        ORDER BY campaign_id;
        
- 4.      
-       
+ 4.   TO OBTAIN A REPORT THAT CALCULATES INCREMENTAL SOLD UNIT % FOR EACH PRODUCT CATEGORY DURING DIWALI CAMPAIGN AND PROVIDE RANKS FOR THOSE PRODUCT CATEGORIES.   
        SELECT category,
        (sum(`quantity_sold(after_promo)`)/ sum(`quantity_sold(before_promo)`)*100) AS ISU_perc,
        RANK () OVER (order by sum((`quantity_sold(after_promo)`/`quantity_sold(before_promo)`)*100) DESC) as p_rank
@@ -37,9 +34,8 @@ from fact_events
        GROUP BY category
        order by p_rank desc;
       
- 5.
-
-SELECT product_name,
+ 5. A REPORT FEATURING TOP 5 PRODUCTS RANKED BY INCREMENTAL REVENUE %
+       SELECT product_name,
        category,
        CASE
            WHEN promo_type = '500 Cashback' THEN ROUND(base_price-500,2)
