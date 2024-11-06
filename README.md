@@ -1,0 +1,1 @@
+ Coming to the project statement AtliQ mart a retail giant which has 50 stores spread across 10 cities in southern India, recently conducted a attractive promotional campaign in Diwali 2023 and Sankranti 2024. To devise effective sales promotion strategies in future we conducted business intelligence analysis on this campaign.
