@@ -25,11 +25,13 @@ fact_events : contains records like event_id, store_id, product_code, campaign_i
 
 
 Tools Used :
+
 •	I used My SQL for answering adhoc questions.
 
 •	Power BI for visualization.
 
 Five AdHoc requests :
+
 •	To identify high value products that are being heavily discounted, 
   we provided list products with base price > 500 and that are featured in promotype ‘BOGOF’ (buy one get one free).
   
